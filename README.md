@@ -1,6 +1,11 @@
 # FastAPI Faker Server
 This is a FastAPI based server that generates fake data using the Faker library. This server can be used to quickly generate mock data for testing or development purposes.
 
+# Examples
+- https://fakerapi-awurkxxgka-uc.a.run.app/users?fields=name,address,email,first_name
+- https://fakerapi-awurkxxgka-uc.a.run.app/posts?fields=uuid4,image_url,sentence,text,date&locale=ru_RU
+- https://fakerapi-awurkxxgka-uc.a.run.app/comments?fields=user_name,text,first_name
+
 # Features
 - Get a list of available fields that can be used to generate data.
 - Generate data with custom fields and in different locales.
