@@ -1,0 +1,51 @@
+import random
+from typing import Optional, List
+
+import uvicorn
+from faker import Faker
+from faker.providers import BaseProvider
+
+from fastapi import FastAPI
+
+from fields import available_fields
+
+app = FastAPI()
+
+
+def get_fake_data(fake: Faker, methods: List[str]):
+    data = {}
+    for provider in fake.get_providers():
+        if isinstance(provider, BaseProvider):
+            provider_methods = [method for method in dir(provider) if method[0] != "_"]
+            for method in methods:
+                if method in provider_methods:
+                    data[method] = getattr(provider, method)()
+    return data
+
+
+@app.get("/available_fields")
+async def get_fields(locale: Optional[str] = 'en_US'):
+    fake = Faker(locale)
+    return get_fake_data(fake, available_fields)
+
+
+@app.get("/{any}")
+async def get_data(
+        locale: Optional[str] = 'en_US',
+        limit: Optional[int] = 10,
+        fields: Optional[str] = None
+):
+    fake = Faker(locale)
+    field_list = [field.strip() for field in fields.split(',')] if fields else []
+    if not field_list:
+        field_list = random.choices(available_fields, k=6)
+
+    data = []
+    for _ in range(limit):
+        data.append(get_fake_data(fake, field_list))
+
+    return data
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
