@@ -1,11 +1,11 @@
 import random
-from typing import Optional, List
+from typing import Optional, List, Annotated
 
 import uvicorn
 from faker import Faker
 from faker.providers import BaseProvider
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 from fields import available_fields
 
@@ -23,16 +23,28 @@ def get_fake_data(fake: Faker, methods: List[str]):
     return data
 
 
-@app.get("/available_fields")
+@app.get("/", name="List of available routes")
+async def get_index():
+    skip_route_names = ["openapi", "swagger_ui_redirect"]
+
+    routes = [
+        {"methods": route.methods, "path": route.path, "name": route.name}
+        for route in app.routes
+        if route.name not in skip_route_names
+    ]
+    return routes
+
+
+@app.get("/available_fields", name="List of available fields")
 async def get_fields(locale: Optional[str] = 'en_US'):
     fake = Faker(locale)
     return get_fake_data(fake, available_fields)
 
 
-@app.get("/{any}")
+@app.get("/{any}", name="Dynamic data getter")
 async def get_data(
         locale: Optional[str] = 'en_US',
-        limit: Optional[int] = 10,
+        limit: Annotated[int, Query(gt=1, lt=500)] = 10,
         fields: Optional[str] = None
 ):
     fake = Faker(locale)
